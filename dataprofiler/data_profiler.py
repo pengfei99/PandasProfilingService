@@ -17,6 +17,8 @@ log.addHandler(handler)
 
 def get_source_df(input_file_path: str, file_format: str, separator=',', na_val='') -> Optional[pd.DataFrame]:
     """
+    This function read various data source file (e.g. csv, json, parquet), then return a pandas data frame of the
+    data source file
     
     :param input_file_path: path of the input file
     :param file_format: file format, only accept csv, json, and parquet
@@ -27,12 +29,12 @@ def get_source_df(input_file_path: str, file_format: str, separator=',', na_val=
     if file_format == "csv":
         df = pd.read_csv(input_file_path, sep=separator, na_values=[na_val])
     elif file_format == "json":
-        tmp_file = open(input_file_path, 'r')
-        text = tmp_file.read()
-
-        json_content = json.loads(text)
-        df = pd.DataFrame(json_content)
+        rows = []
+        for line in open(input_file_path, 'r'):
+            rows.append(json.loads(line))
+        df = pd.DataFrame(rows)
         # I don't use df = pd.read_json(input_file_path), because it can't handle null value in json file correctly.
+
     elif file_format == "parquet":
         table = pq.read_table(input_file_path)
         df = table.to_pandas()
@@ -104,3 +106,40 @@ def generate_report_with_meta(df: pd.DataFrame, dataset_metadata: dict, columns_
     else:
         log.info(f"Profiling Report is successfully generated")
         return profile
+
+
+def main():
+    csv_file_path = "../data/adult.csv"
+    output_path = "/tmp/report"
+
+    # df = get_source_df(csv_file_path, "csv", ",", na_val="?")
+    # print(df.head())
+    # if df is not None:
+    #     result = generate_report(df, output_path, "report.html")
+    #     print(result)
+    # else:
+    #     print("failed")
+
+    # json_file_path = "../data/adult.json"
+    #
+    # df1 = get_source_df(json_file_path, "json")
+    # print(df1.head())
+    # if df1 is not None:
+    #     result = generate_report(df1, output_path, "report1.html")
+    #     print(result)
+    # else:
+    #     print("failed")
+
+    parquet_file_path = "../data/adult.snappy.parquet"
+
+    df2 = get_source_df(parquet_file_path, "parquet")
+    print(df2.head())
+    if df2 is not None:
+        result = generate_report(df2, output_path, "report2.html")
+        print(result)
+    else:
+        print("failed")
+
+
+if __name__ == "__main__":
+    main()
