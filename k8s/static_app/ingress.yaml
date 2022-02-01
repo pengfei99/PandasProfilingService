@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-nginx
+spec:
+  tls:
+    - hosts:
+        - nginx-test.lab.sspcloud.fr
+  rules:
+    - host:  nginx-test.lab.sspcloud.fr
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: nginx-test-service
+                port:
+                  number: 80
