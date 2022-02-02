@@ -30,8 +30,8 @@ class LocalStorageEngine(StorageEngineInterface):
     def get_storage_engine_type(self) -> str:
         return self.storage_engine_type
 
-    def get_short_file_name(self, file_name: str):
-        return file_name
+    def get_short_file_name(self, full_file_path: str):
+        return full_file_path.split("/")[-1]
 
     @staticmethod
     def move_file(source_path: str, destination_path: str):

@@ -64,11 +64,16 @@ class StorageEngineInterface(metaclass=abc.ABCMeta):
     # tmp/sql_backup/2022-01-11_test_pg_bck.sql.
     # So we need to have one specific implementation for each StorageEngine
     @abc.abstractmethod
-    def get_short_file_name(self, file_name: str):
+    def get_short_file_name(self, full_file_path: str):
         """
-         This function extract the short file name from the s3 object key
-        :param file_name: the raw file name for the storage engine
-        :return:
+         This function extract the short file name from the full file path. because each storage has different
+         definition for file_name. In linux fs, the file_name of /tmp/sql_backup/2022-01-11_test_pg_bck.sql is
+         2022-01-11_test_pg_bck.sql
+         For s3, the file name (object key) of s3://pengfei/tmp/sql_backup/2022-01-11_test_pg_bck.sql is
+         tmp/sql_backup/2022-01-11_test_pg_bck.sql.
+         But we want a unified result 2022-01-11_test_pg_bck.sql
+        :param full_file_path: the raw file name for the storage engine
+        :return: short file name
         """
 
         raise NotImplementedError

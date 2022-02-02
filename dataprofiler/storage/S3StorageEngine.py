@@ -67,13 +67,23 @@ class S3StorageEngine(StorageEngineInterface):
     def get_storage_engine_type(self) -> str:
         return self.storage_engine_type
 
-    def get_short_file_name(self, file_name: str):
-        return file_name.split("/")[-1]
+    def get_short_file_name(self, full_file_path: str):
+        bucket_name, bucket_key = S3StorageEngine.parse_path(full_file_path)
+        return bucket_key.split("/")[-1]
 
     @staticmethod
     def parse_path(path: str):
-        # note the path must have the format protocol://{bucket_name}/{bucket_key}
-        # for example s3a://user-pengfei/tmp/sparkcv/input is a valid path for S3StorageEngine
+        """
+        This function takes a full s3 path which must have the format protocol://{bucket_name}/{bucket_key}
+        for example s3a://pengfei/tmp/sparkcv/input.parquet is a valid path for S3StorageEngine
+
+        :param path: full s3 path
+        :return: return the bucket_name, and bucket key
+
+        Example:
+        s3a://toto_bucket/tmp/input.parquet should return  toto_bucket as bucket_name and /tmp/input.parquet as bucket_key
+        """
+
         s3_path_pattern = "^s3[a-z]?://([^/]+)/(.*?([^/]+)/?)$"
         if re.match(s3_path_pattern, path):
             short_path = path.split("//")[-1]
@@ -84,6 +94,11 @@ class S3StorageEngine(StorageEngineInterface):
         else:
             log.error("The given s3 path is not a validate path")
             raise ValueError
+
+    @staticmethod
+    def get_filename(path: str):
+        bucket_name, bucket_key = S3StorageEngine.parse_path(path)
+        return bucket_key.split("/")[-1]
 
     @staticmethod
     def build_s3_object_key(source_file_path: str, bucket_key: str):
