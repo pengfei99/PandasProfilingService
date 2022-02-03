@@ -1,16 +1,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: nginx-test
+  name: data-profiling
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: nginx-test
+      app: data-profiling
   template:
     metadata:
       labels:
-        app: nginx-test
+        app: data-profiling
     spec:
       volumes:
       - name: html
@@ -30,6 +30,21 @@ spec:
         - name: html
           mountPath: /html
         env:
+          - name: AWS_S3_ENDPOINT
+            value: "minio.lab.sspcloud.fr" # your s3 server endpoint, example: minio.lab.sspcloud.fr
+          - name: AWS_ACCESS_KEY_ID # your s3 server access key id
+            valueFrom:
+              secretKeyRef:
+                name: my-s3-creds
+                key: accessKey
+          - name: AWS_SECRET_ACCESS_KEY # your s3 server secret key
+            valueFrom:
+              secretKeyRef:
+                name: my-s3-creds
+                key: secretKey
+          # The token is optional based on your s3 creds type, you can leave it empty
+          - name: AWS_SESSION_TOKEN
+            value: ""    # your s3 server access token, example:
           - name: INPUT_FILE
             value: "s3a://pengfei/diffusion/data_profiling/adult.snappy.parquet" # the full path of your backup file, example: s3://path/to/sql_backup/adult.snappy.parquet
           - name: FILE_FORMAT
@@ -40,8 +55,7 @@ spec:
             value: "html"
           - name: REPORT_NAME
             value: "index"
-
-            command: [ sh, -c ]
-            args: [ "python dataprofiler/main.py --action render --storage_type s3 --input_file $INPUT_FILE
+        command: [ sh, -c ]
+        args: [ "python dataprofiler/main.py --action render --storage_type s3 --input_file $INPUT_FILE
                           --file_format $FILE_FORMAT --report_render_path $RENDER_PATH --report_format $REPORT_FORMAT 
-                          --report_name $REPORT_NAME --report_save_path $REPORT_SAVE_PATH" ]
+                          --report_name $REPORT_NAME" ]

@@ -5,15 +5,15 @@ metadata:
 spec:
   tls:
     - hosts:
-        - nginx-test.lab.sspcloud.fr
+        - data-profiling.lab.sspcloud.fr
   rules:
-    - host:  nginx-test.lab.sspcloud.fr
+    - host:  data-profiling.lab.sspcloud.fr
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: nginx-test-service
+                name: data-profiling-service
                 port:
                   number: 80
