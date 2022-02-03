@@ -46,16 +46,15 @@ spec:
           - name: AWS_SESSION_TOKEN
             value: ""    # your s3 server access token, example:
           - name: INPUT_FILE
-            value: "s3a://pengfei/diffusion/data_profiling/adult.snappy.parquet" # the full path of your backup file, example: s3://path/to/sql_backup/adult.snappy.parquet
+            value: "s3a://pengfei/diffusion/data_profiling/adult.csv" # the full path of your backup file, example: s3://path/to/sql_backup/adult.snappy.parquet
           - name: FILE_FORMAT
-            value: "parquet" # example: parquet, json, csv
-          - name: RENDER_PATH
-            value: "/html"
-          - name: REPORT_FORMAT
-            value: "html"
-          - name: REPORT_NAME
-            value: "index"
+            value: "csv" # example: parquet, json, csv
+          - name: SEPARATOR
+            value: ","
+          - name: NA_VAL
+            value: "?"
         command: [ sh, -c ]
         args: [ "python dataprofiler/main.py --action render --storage_type s3 --input_file $INPUT_FILE
-                          --file_format $FILE_FORMAT --report_render_path $RENDER_PATH --report_format $REPORT_FORMAT 
-                          --report_name $REPORT_NAME" ]
+                          --file_format $FILE_FORMAT --separator $SEPARATOR --na_val $NA_VAL 
+                          --report_render_path /html --report_format html
+                          --report_name index" ]
