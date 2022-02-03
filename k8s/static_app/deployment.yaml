@@ -24,12 +24,24 @@ spec:
         - name: html
           mountPath: /usr/share/nginx/html
       initContainers:
-      - name: load-data
-        image: debian
+      - name: generate-bot
+        image: liupengfei99/pandas_data_profiling:main
         volumeMounts:
         - name: html
           mountPath: /html
-        command: ["/bin/sh", "-c"]
-        args:
-          - date >> /html/index.html;
-            sleep 1;
+        env:
+          - name: INPUT_FILE
+            value: "s3a://pengfei/diffusion/data_profiling/adult.snappy.parquet" # the full path of your backup file, example: s3://path/to/sql_backup/adult.snappy.parquet
+          - name: FILE_FORMAT
+            value: "parquet" # example: parquet, json, csv
+          - name: RENDER_PATH
+            value: "/html"
+          - name: REPORT_FORMAT
+            value: "html"
+          - name: REPORT_NAME
+            value: "index"
+
+            command: [ sh, -c ]
+            args: [ "python dataprofiler/main.py --action render --storage_type s3 --input_file $INPUT_FILE
+                          --file_format $FILE_FORMAT --report_render_path $RENDER_PATH --report_format $REPORT_FORMAT 
+                          --report_name $REPORT_NAME --report_save_path $REPORT_SAVE_PATH" ]
