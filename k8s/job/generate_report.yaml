@@ -27,7 +27,7 @@ spec:
             - name: AWS_SESSION_TOKEN
               value: ""    # your s3 server access token, example:
             - name: INPUT_FILE
-              value: "changeMe" # the full path of your backup file, example: s3://path/to/sql_backup/adult.snappy.parquet
+              value: "s3a://pengfei/diffusion/data_profiling/adult.snappy.parquet" # the full path of your backup file, example: s3://path/to/sql_backup/adult.snappy.parquet
             - name: FILE_FORMAT
               value: "parquet" # example: parquet, json, csv
             - name: RENDER_PATH

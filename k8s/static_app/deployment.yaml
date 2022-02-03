@@ -23,6 +23,7 @@ spec:
         volumeMounts:
         - name: html
           mountPath: /usr/share/nginx/html
+      initContainers:
       - name: load-data
         image: debian
         volumeMounts:
@@ -30,7 +31,5 @@ spec:
           mountPath: /html
         command: ["/bin/sh", "-c"]
         args:
-          - while true; do
-              date >> /html/index.html;
-              sleep 1;
-            done
+          - date >> /html/index.html;
+            sleep 1;
