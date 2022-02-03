@@ -1,0 +1,52 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: generate-data-profile-report
+  labels:
+    app: generate-data-profile-report
+spec:
+  template:
+    spec:
+      containers:
+        - name: generate-bot
+          image: liupengfei99/pandas_data_profiling:main
+          env:
+            - name: AWS_S3_ENDPOINT
+              value: "minio.lab.sspcloud.fr" # your s3 server endpoint, example: minio.lab.sspcloud.fr
+            - name: AWS_ACCESS_KEY_ID # your s3 server access key id
+              valueFrom:
+                secretKeyRef:
+                  name: my-s3-creds
+                  key: accessKey
+            - name: AWS_SECRET_ACCESS_KEY # your s3 server secret key
+              valueFrom:
+                secretKeyRef:
+                  name: my-s3-creds
+                  key: secretKey
+            # The token is optional based on your s3 creds type, you can leave it empty
+            - name: AWS_SESSION_TOKEN
+              value: ""    # your s3 server access token, example:
+            - name: INPUT_FILE
+              value: "changeMe" # the full path of your backup file, example: s3://path/to/sql_backup/adult.snappy.parquet
+            - name: FILE_FORMAT
+              value: "parquet" # example: parquet, json, csv
+            - name: RENDER_PATH
+              value: "/tmp"
+            - name: REPORT_FORMAT
+              value: "html"
+            - name: REPORT_NAME
+              value: "adult_report"
+            - name: REPORT_SAVE_PATH
+              value: "s3a://pengfei/diffusion/data_profiling/report"
+
+          command: [sh, -c]
+          args: ["python dataprofiler/main.py --action save --storage_type s3 --input_file $INPUT_FILE
+                  --file_format $FILE_FORMAT --report_render_path $RENDER_PATH --report_format $REPORT_FORMAT 
+                  --report_name $REPORT_NAME --report_save_path $REPORT_SAVE_PATH"]
+      restartPolicy: Never
+  completions: 1
+
+  parallelism: 1
+  activeDeadlineSeconds: 100
+  ttlSecondsAfterFinished: 150
+  backoffLimit: 4
