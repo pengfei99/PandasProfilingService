@@ -39,10 +39,10 @@ def main():
                              choices=['parquet', 'csv', 'json'],
                              required=True,
                              help="File format of the input file which you want to profile, Possible values: csv ,json")
-    args_parser.add_argument("--report_path",
-                             metavar="report_output_path",
+    args_parser.add_argument("--report_render_path",
+                             metavar="render_path",
                              required=True,
-                             help="Parent dir for storing output report")
+                             help="Parent dir for storing report which are ready for rendering")
     args_parser.add_argument("--report_format",
                              metavar="storage_type",
                              choices=['html', 'json'],
