@@ -85,7 +85,7 @@ def main():
         exit(1)
 
     # build a data profiler
-    profiler = DataProfiler(storage_engine, args.report_path)
+    profiler = DataProfiler(storage_engine, args.report_render_path)
 
     #
     if args.action == "render":
