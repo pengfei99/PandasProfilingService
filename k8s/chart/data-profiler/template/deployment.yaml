@@ -72,13 +72,13 @@ template:
           { { - end } }
         env:
           - name: INPUT_FILE
-            value: "{{ .Values.global.filePath }}"
+            value: "{{ .Values.global.datasource.filePath }}"
           - name: FILE_FORMAT
-            value: "{{ .Values.global.fileFormat }}"
+            value: "{{ .Values.global.datasource.fileFormat }}"
           - name: SEPARATOR
-            value: "{{ .Values.global.separator }}"
+            value: "{{ .Values.global.datasource.separator }}"
           - name: NA_VAL
-            value: "{{ .Values.global.naVal }}"
+            value: "{{ .Values.global.datasource.naVal }}"
 
     { { - with .Values.nodeSelector } }
     nodeSelector:

@@ -2,10 +2,11 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 global:
-  filePath: "s3a://pengfei/diffusion/data_profiling/adult.csv"
-  fileFormat: "csv"
-  separator: ","
-  naVal: "?"
+  datasource:
+    filePath: "s3a://pengfei/diffusion/data_profiling/adult.csv"
+    fileFormat: "csv"
+    separator: ","
+    naVal: "?"
 
 replicaCount: 1
 

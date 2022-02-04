@@ -83,7 +83,7 @@
         "datasource": {
           "description": "datasource specific configuration",
           "type": "object",
-          "title": "Database",
+          "title": "Data source",
           "properties": {
             "filePath": {
               "type": "string",
