@@ -12,6 +12,7 @@ RUN pip install --no-cache-dir --upgrade -r /app/requirements.txt
 
 # copy the main code of backup
 COPY dataprofiler /app/dataprofiler
+COPY main.sh /app/main.sh
 
 # set up python path for the added source
 ENV PYTHONPATH "${PYTHONPATH}:/app"
