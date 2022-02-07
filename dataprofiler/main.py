@@ -1,12 +1,22 @@
 import argparse
 import logging
+import os
 import sys
 
 from dataprofiler.DataProfiler import DataProfiler
 from dataprofiler.storage.LocalStorageEngine import LocalStorageEngine
-import os
-
 from dataprofiler.storage.S3StorageEngine import S3StorageEngine
+
+
+def str2bool(v):
+    if isinstance(v, bool):
+        return v
+    if v.lower() in ('true', 't'):
+        return True
+    elif v.lower() in ('false', 'f'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
 
 
 def main():
@@ -68,6 +78,16 @@ def main():
                              metavar="name",
                              default=None,
                              help="The name of the generated report")
+    args_parser.add_argument("--minimal",
+                             metavar="boolean",
+                             choices=['True', 'False'],
+                             default="True",
+                             help="The report content can be minimal to speed up the report generation")
+    args_parser.add_argument("--explorative",
+                             metavar="boolean",
+                             choices=['True', 'False'],
+                             default="False",
+                             help="Remove charts from report content to speed up the report generation")
     args = args_parser.parse_args()
 
     if args.storage_type == "local":
@@ -87,12 +107,16 @@ def main():
     # build a data profiler
     profiler = DataProfiler(storage_engine, args.report_render_path)
 
-    #
+    # get option value
+    minimal = str2bool(args.minimal)
+    explorative = str2bool(args.explorative)
+
     if args.action == "render":
         try:
             profiler.make_report(input_file_path=args.input_file, file_format=args.file_format,
                                  report_format=args.report_format, separator=args.separator, na_val=args.na_val,
-                                 report_title=args.report_title, report_name=args.report_name)
+                                 report_title=args.report_title, report_name=args.report_name, minimal=minimal,
+                                 explorative=explorative)
         except Exception as e:
             log.error(e)
             sys.exit(1)
@@ -102,7 +126,7 @@ def main():
             profiler.save_report(input_file_path=args.input_file, file_format=args.file_format,
                                  report_format=args.report_format, separator=args.separator, na_val=args.na_val,
                                  report_title=args.report_title, report_name=args.report_name,
-                                 report_destination=args.report_save_path)
+                                 report_destination=args.report_save_path, minimal=minimal, explorative=explorative)
         except Exception as e:
             log.error(e)
             sys.exit(1)

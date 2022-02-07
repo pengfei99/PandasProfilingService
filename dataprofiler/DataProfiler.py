@@ -1,15 +1,13 @@
+import json
 import logging
+import os
 from typing import Optional
 
 import pandas as pd
 import pandas_profiling as pp
-from pandas_profiling import ProfileReport
-import json
-import os
 import pyarrow.parquet as pq
+from pandas_profiling import ProfileReport
 
-from dataprofiler.storage.LocalStorageEngine import LocalStorageEngine
-from dataprofiler.storage.S3StorageEngine import S3StorageEngine
 from dataprofiler.storage.StorageEngineInterface import StorageEngineInterface
 
 log = logging.getLogger(__name__)
@@ -26,9 +24,25 @@ class DataProfiler:
         self.tmp_dir = tmp_dir
 
     def save_report(self, input_file_path: str, file_format: str, report_format: str, report_destination: str,
-                    separator=',', na_val='', report_title="", report_name=""):
+                    separator=',', na_val='', report_title="", report_name="", minimal=True, explorative=False):
+        """
+        This function takes a input file path, generate a data profiling report, and copy it to a output path
+
+        :param report_destination: the path to store output report
+        :param explorative: remove some stats from column detail page for better speed
+        :param minimal: remove correlation and duplication row detection for better speed.
+        :param input_file_path: full input file path. if s3 path, it must be in format s3://{bucket_name}/{bucket_key}
+        :param file_format: input data file format, only csv, json and parquet are accepted
+        :param report_format: output report format, only html and json are accepted
+        :param separator: if input data file format is csv, you can specify a custom csv
+        :param na_val: if input data file format is csv, you can specify a custom na_val
+        :param report_title: The title of the report in the generated report file
+        :param report_name: The name of the generated report file
+        :return: if success, return nothing, otherwise raise exception
+
+        """
         local_path = self.make_report(input_file_path, file_format, report_format, separator, na_val, report_title,
-                                      report_name)
+                                      report_name, minimal=minimal, explorative=explorative)
         if local_path is not None:
             full_report_path = f"{report_destination}/{report_name}.{report_format}"
             if self.storage_engine.upload_data(local_path, full_report_path):
@@ -41,12 +55,14 @@ class DataProfiler:
             raise
 
     def make_report(self, input_file_path: str, file_format: str, report_format: str, separator=',', na_val='',
-                    report_title="", report_name="") -> Optional[str]:
+                    report_title="", report_name="", minimal=True, explorative=False) -> Optional[str]:
         """
         This function takes a data file path, and generate a data profile report, the parameter such as separator, na_val
         is optional, and only has effect if file_format is csv. If the report_title and report_name are empty, we
         will generate one based on input file name
 
+        :param explorative: remove some stats from column detail page for better speed
+        :param minimal: remove correlation and duplication row detection for better speed.
         :param input_file_path: full input file path. if s3 path, it must be in format s3://{bucket_name}/{bucket_key}
         :param file_format: input data file format, only csv, json and parquet are accepted
         :param report_format: output report format, only html and json are accepted
@@ -76,7 +92,8 @@ class DataProfiler:
             # if convert to pandas dataframe is successful, start generate report
             if df is not None:
                 # if generate report is successful, log success
-                if DataProfiler.generate_report(df, self.tmp_dir, report_name, report_title):
+                if DataProfiler.generate_report(df, self.tmp_dir, report_name, report_title, minimal=minimal,
+                                                explorative=explorative):
                     report_full_path = f"{self.tmp_dir}/{report_name}"
                     log.info(f"Successfully generated report for {input_file_path}, report location {report_full_path}")
                     return report_full_path
@@ -120,10 +137,13 @@ class DataProfiler:
         return df
 
     @staticmethod
-    def generate_report(df: pd.DataFrame, output_path: str, report_name: str, report_title="Profiling Report") -> bool:
+    def generate_report(df: pd.DataFrame, output_path: str, report_name: str, report_title="Profiling Report",
+                        minimal=True, explorative=False) -> bool:
         """
         This function generates a data profiling report without metadata and column description
 
+        :param explorative: remove some stats from column detail page for better speed
+        :param minimal: remove correlation and duplication row detection for better speed.
         :param df: input pandas dataframe which we will profile
         :param output_path: output report parent directory
         :param report_name: the name of the output report
@@ -133,7 +153,7 @@ class DataProfiler:
 
         try:
             os.makedirs(output_path, exist_ok=True)
-            profile = ProfileReport(df, title=report_title, explorative=True)
+            profile = ProfileReport(df, title=report_title, minimal=minimal, explorative=explorative)
             report_full_path = f"{output_path}/{report_name}"
             profile.to_file(report_full_path)
         except Exception as e:
