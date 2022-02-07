@@ -26,6 +26,7 @@ spec:
       initContainers:
       - name: generate-bot
         image: liupengfei99/pandas_data_profiling:main
+        imagePullPolicy: Always
         volumeMounts:
         - name: html
           mountPath: /html
