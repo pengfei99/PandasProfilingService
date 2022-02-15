@@ -80,13 +80,13 @@ def main():
                              help="The name of the generated report")
     args_parser.add_argument("--minimal",
                              metavar="boolean",
-                             choices=['True', 'False', 'true', 'false'],
-                             default="True",
+                             choices=['true', 'false'],
+                             default="true",
                              help="The report content can be minimal to speed up the report generation")
     args_parser.add_argument("--explorative",
                              metavar="boolean",
-                             choices=['True', 'False', 'true', 'false'],
-                             default="False",
+                             choices=['true', 'false'],
+                             default="false",
                              help="Remove charts from report content to speed up the report generation")
     args = args_parser.parse_args()
 
